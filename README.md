@@ -14,7 +14,7 @@ This firmware linearized the fan by mapping a PWM set value input to the serial 
 This firmware also inverts the duty cycle because a transistor was used to buffer the GPIO pin output to the fan PWM input. 
 This is because of reports of fans with a pull up to 6V which would exceed the input voltage on 5V and certainly 3.3 Volt controllers.
 
-**SCREEN SHOT of LINEARIZED RPM PLOT**
+**SCREEN SHOT of LINEARIZED RPM PLOT**  
 ![MapPWMfrom70to255_92mmFan.png](MapPWMfrom70to255_92mmFan.png)  
 Plot of the linearized Fan RPM verse input. (Made by the auto setup feature built into this program) 
 
@@ -25,3 +25,30 @@ From the Arduino IDE open the serial plotter. The short cut keys "CTRL, SHIFT, L
 Type a number in the interval [0, 255] to set the linearized PWM to the fan.
 Typa a number > 255 to start an automatic stepping of the PWM by 10.
 Typa a number < 0 to stop the automatic stepping of the PWM.
+
+
+## The linearizing function
+Note the "magic number" 70 is the lower RPM limit found for a fan.  Check your fan and modify the LOWER_RPM accordingly.
+
+```
+/*
+  Linearize the fan (as measure by the Tachometer output)
+  Set the fan value taking into account the inversion in the hardware
+  And map over the range where fan is linear.
+*/
+void updatelinearFanPWM(String inputString) {
+  int fanPWMset = 0;
+  int fanPWMLINValue = 0;
+  const int LOWER_RPM = 70; //Empircaly determined for 92mm fan. Linear tach starts here.
+
+  //Floor and ceiling on PWM value.
+  fanPWMvalue = inputString.toInt();
+  fanPWMvalue = max(fanPWMvalue, 0);
+  fanPWMvalue = min(fanPWMvalue, 255);
+  //Lineariz the range.
+  fanPWMLINValue = map(fanPWMvalue, 0, 255, LOWER_RPM, 255); //Map to linear range.
+  fanPWMset = 255 - fanPWMLINValue;    //Inverted PWM sense because of transistor on GPIO output.
+  analogWrite(FAN_PIN, fanPWMset);  //To Fan PWM.
+}//end update fan pwm
+
+```
