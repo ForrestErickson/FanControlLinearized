@@ -1,5 +1,5 @@
 /*
-  File: FrequencyCounterusingTimers1and2.ino
+  File: FanControlLinearized.ino
   By: Forrest Lee Erickson
   Date: 20230522 Initial release.
   About:
