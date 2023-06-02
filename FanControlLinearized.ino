@@ -2,6 +2,7 @@
   File: FanControlLinearized.ino
   By: Forrest Lee Erickson
   Date: 20230522 Initial release.
+  Date: 20230602 Correct Program Name.
   About:
   ====================================
   Linearized control of a PWM fan.
@@ -23,8 +24,8 @@
 */
 
 
-#define PROG_NAME "**** FrequencyCounterusingTimers1and2 ****"
-#define VERSION "Rev: 0.3"  //
+#define PROG_NAME "**** FanControlLinearized ****"
+#define VERSION "Rev: 0.4"  //
 #define BAUDRATE 115200
 
 #define FAN_PIN 6 //A PWM to control the fan through an inveting transistor.
