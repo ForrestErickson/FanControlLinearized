@@ -3,6 +3,7 @@
   By: Forrest Lee Erickson
   Date: 20230522 Initial release.
   Date: 20230602 Correct Program Name.
+  Date:  20230602 Make set to zero turn fan off. Compile time options for Linear, and Invert PWM.
   About:
   ====================================
   Linearized control of a PWM fan.
@@ -10,7 +11,7 @@
   Frequencey counter based on code modified from here: https://akuzechie.blogspot.com/2021/02/frequency-counter-using-arduino-timers.html
   Information on Arduino UNO counter use here: https://docs.arduino.cc/tutorials/generic/secrets-of-arduino-pwm
   ====================================
-  Hardware: Run this on an Arduino UNO. 
+  Hardware: Run this on an Arduino UNO.
   Fan tachometer is input on pin D5 and a 10K pull up to Vcc is used.
   Output PWM to fan on D6 through a transistor which inverts the PWM.
   Simple user interface:
@@ -27,6 +28,14 @@
 #define PROG_NAME "**** FanControlLinearized ****"
 #define VERSION "Rev: 0.4"  //
 #define BAUDRATE 115200
+
+//Compile time setup.
+//For enabeling / disabeling fan linerization.
+bool isLinearizeFan = true;
+
+//For polatiry control of PWM. 
+bool isInvertPWM = true;
+
 
 #define FAN_PIN 6 //A PWM to control the fan through an inveting transistor.
 
@@ -55,8 +64,11 @@ void setup()
   analogWrite(FAN_PIN, (255 - fanPWMvalue));  //To Fan PWM.
   Serial.begin(BAUDRATE);
   delay(100);
-  Serial.println("Fan_set*10 Measured_RPM ");
-  Serial.println("3500 0 ");    //Forces the Arduino IDE plot scale to 4000.
+  
+  Serial.print("Fan_set*10 Measured_RPM ");
+  Serial.print(PROG_NAME);
+  Serial.println(VERSION);
+  Serial.println("0 0 ");    //Forces the Arduino IDE plot scale to 4000.
   delay(1000); //So that fan can get to set speed.
   //  Make a single frequencey read to get the count setup.
   startCount(1000);
@@ -84,23 +96,8 @@ void loop()
     lastINCtime = millis();
   }//end if time to increment
 
-  // Get user input, a string when a newline arrives:
-  //Manages the state of auto incrementing.
-  if (stringComplete) {
-    //    Serial.println(inputString);
-    if (inputString.toInt() < 0) {
-      autoIncerment = false; // set for
-      //      Serial.println("Set auto increment false");
-    }
-    if (inputString.toInt() > 255) {
-      autoIncerment = true; // set for
-      //      Serial.println("Set auto increment true");
-    } else {
-      updatelinearFanPWM(inputString);
-    }
-    inputString = "";
-    stringComplete = false;
-  }//end processing string.
+  updateSerialInput();
+
 }//end of loop()
 
 
@@ -182,8 +179,45 @@ void updatelinearFanPWM(String inputString) {
   fanPWMvalue = inputString.toInt();
   fanPWMvalue = max(fanPWMvalue, 0);
   fanPWMvalue = min(fanPWMvalue, 255);
+
   //Lineariz the range.
-  fanPWMLINValue = map(fanPWMvalue, 0, 255, LOWER_RPM, 255); //Map to linear range.
-  fanPWMset = 255 - fanPWMLINValue;    //Inverted PWM sense because of transistor on GPIO output.
+  //Zero will still set to zero, off.
+  if (isLinearizeFan == true) {
+    if (fanPWMvalue != 0) {
+      fanPWMLINValue = map(fanPWMvalue, 0, 255, LOWER_RPM, 255); //Map to linear range.
+    }
+  }//end linearize fand
+
+  if (isInvertPWM == true) {
+    fanPWMset = 255 - fanPWMLINValue;    //Inverted PWM sense because of transistor on GPIO output.
+  }
   analogWrite(FAN_PIN, fanPWMset);  //To Fan PWM.
 }//end update fan pwm
+
+void updateSerialInput(void) {
+  // Get user input, a string when a newline arrives:
+  //Manages the state of auto incrementing.
+  if (stringComplete) {
+    //    Serial.println(inputString);  //For debuging string input.
+
+    //    if (inputString == "L\n") {
+    //      Serial.println("Set Linearize the fan");
+    //    }//Test for "L"
+    //    if (inputString == "l\n") {
+    //      Serial.println("Clear Linearize the fan");
+    //    }//Test for "l"
+
+    if (inputString.toInt() < 0) {
+      autoIncerment = false; // set for
+      //      Serial.println("Set auto increment false");
+    }
+    if (inputString.toInt() > 255) {
+      autoIncerment = true; // set for
+      //      Serial.println("Set auto increment true");
+    } else {
+      updatelinearFanPWM(inputString);
+    }
+    inputString = "";
+    stringComplete = false;
+  }//end processing string.
+}
