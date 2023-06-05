@@ -185,14 +185,11 @@ void updatelinearFanPWM(String inputString) {
 
   //Lineariz the range.
   //Zero will still set to zero, off.
-  //  if (isLinearizeFan == true) {
-  //  if (fanPWMvalue != 0) {
   fanPWMLINValue = map(fanPWMvalue, 0, 255, LOWER_PWM, 255); //Map to linear range.
   if (isInvertPWM == true) {
     fanPWMset = 255 - fanPWMLINValue;    //Inverted PWM sense because of transistor on GPIO output.
   }//end linearize fan
   analogWrite(FAN_PIN, fanPWMset);  //To Fan PWM.
-  //  }
 }//end update fan pwm
 
 void updateSerialInput(void) {
