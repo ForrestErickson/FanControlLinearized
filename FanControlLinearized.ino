@@ -26,14 +26,15 @@
 
 
 #define PROG_NAME "**** FanControlLinearized ****"
-#define VERSION "Rev: 0.4"  //
+#define VERSION "Rev: 0.5"  //
 #define BAUDRATE 115200
 
 //Compile time setup.
 //For enabeling / disabeling fan linerization.
 bool isLinearizeFan = true;
+//bool isLinearizeFan = false;
 
-//For polatiry control of PWM. 
+//For polatiry control of PWM.
 bool isInvertPWM = true;
 
 
@@ -64,10 +65,11 @@ void setup()
   analogWrite(FAN_PIN, (255 - fanPWMvalue));  //To Fan PWM.
   Serial.begin(BAUDRATE);
   delay(100);
-  
-  Serial.print("Fan_set*10 Measured_RPM ");
-  Serial.print(PROG_NAME);
-  Serial.println(VERSION);
+
+  Serial.print("Fan_set*10 RPM ");
+  Serial.print("9BMB24P2K01_FourWire_");
+  //  Serial.print(PROG_NAME);
+  //  Serial.println(VERSION);
   Serial.println("0 0 ");    //Forces the Arduino IDE plot scale to 4000.
   delay(1000); //So that fan can get to set speed.
   //  Make a single frequencey read to get the count setup.
@@ -173,7 +175,8 @@ void serialEvent() {
 void updatelinearFanPWM(String inputString) {
   int fanPWMset = 0;
   int fanPWMLINValue = 0;
-  const int LOWER_RPM = 70; //Empircaly determined for 92mm fan. Linear tach starts here.
+  //  const int LOWER_PWM = 70; //Empircaly determined for 92mm fan. Linear tach starts here.
+  const int LOWER_PWM = 0; //Empircaly determined for ???mm fan. Linear tach starts here.
 
   //Floor and ceiling on PWM value.
   fanPWMvalue = inputString.toInt();
@@ -182,16 +185,14 @@ void updatelinearFanPWM(String inputString) {
 
   //Lineariz the range.
   //Zero will still set to zero, off.
-  if (isLinearizeFan == true) {
-    if (fanPWMvalue != 0) {
-      fanPWMLINValue = map(fanPWMvalue, 0, 255, LOWER_RPM, 255); //Map to linear range.
-    }
-  }//end linearize fand
-
+  //  if (isLinearizeFan == true) {
+  //  if (fanPWMvalue != 0) {
+  fanPWMLINValue = map(fanPWMvalue, 0, 255, LOWER_PWM, 255); //Map to linear range.
   if (isInvertPWM == true) {
     fanPWMset = 255 - fanPWMLINValue;    //Inverted PWM sense because of transistor on GPIO output.
-  }
+  }//end linearize fan
   analogWrite(FAN_PIN, fanPWMset);  //To Fan PWM.
+  //  }
 }//end update fan pwm
 
 void updateSerialInput(void) {
