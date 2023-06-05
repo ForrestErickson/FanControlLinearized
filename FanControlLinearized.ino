@@ -26,8 +26,9 @@
 
 
 #define PROG_NAME "**** FanControlLinearized ****"
-#define VERSION "Rev: 0.5"  //
+#define VERSION "Rev: 0.6"  //
 #define BAUDRATE 115200
+#define DEVICE_UNDER_TEST "9BMB24P2K01_FourWire_"
 
 //Compile time setup.
 //For enabeling / disabeling fan linerization.
@@ -67,10 +68,11 @@ void setup()
   delay(100);
 
   Serial.print("Fan_set*10 RPM ");
-  Serial.print("9BMB24P2K01_FourWire_");
+  Serial.print("VoltageIntoFan*100 ");
+  Serial.print(DEVICE_UNDER_TEST);
   //  Serial.print(PROG_NAME);
   //  Serial.println(VERSION);
-  Serial.println("0 0 ");    //Forces the Arduino IDE plot scale to 4000.
+  Serial.println("0 8000 0");    //Forces the Arduino IDE plot scale to 4000.
   delay(1000); //So that fan can get to set speed.
   //  Make a single frequencey read to get the count setup.
   startCount(1000);
@@ -86,6 +88,8 @@ void loop()
     Serial.print(fanPWMvalue * 10);  //Scale by 10 for ploting visibility.
     Serial.print(" ");  //Prints a base line at zero
     Serial.print(totalCounts * 30);  //This converts the fan two pulses per revolution into RPM.
+    Serial.print(" ");  //Prints the A1
+    Serial.print(map(analogRead(A1),0,1023,0,5000));
     Serial.println();
   }
 
@@ -188,6 +192,8 @@ void updatelinearFanPWM(String inputString) {
   fanPWMLINValue = map(fanPWMvalue, 0, 255, LOWER_PWM, 255); //Map to linear range.
   if (isInvertPWM == true) {
     fanPWMset = 255 - fanPWMLINValue;    //Inverted PWM sense because of transistor on GPIO output.
+  } else {
+    fanPWMset = fanPWMLINValue;    //No inversion of PWM. 
   }//end linearize fan
   analogWrite(FAN_PIN, fanPWMset);  //To Fan PWM.
 }//end update fan pwm
