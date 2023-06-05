@@ -51,3 +51,8 @@ void updatelinearFanPWM(String inputString) {
 }//end update fan pwm
 
 ```
+
+## Notes on testing fan type 9BMB24P2K01_Fourier
+This fan runs at 24V and moves significantly more air than the 120 mm and 92 mm fans I tested from PC applications.
+The RPM of this fan is not linearly with respect to the PWM input on any part of its range.
+![image](https://github.com/ForrestErickson/FanControlLinearized/assets/5836181/6b2f4038-8a98-4274-8ec3-cb965e63be43)
