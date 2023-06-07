@@ -26,9 +26,10 @@
 
 
 #define PROG_NAME "**** FanControlLinearized ****"
-#define VERSION "Rev: 0.6"  //
+#define VERSION "Rev: 0.7"  //
 #define BAUDRATE 115200
-#define DEVICE_UNDER_TEST "9BMB24P2K01_FourWire_"
+//#define DEVICE_UNDER_TEST "9BMB24P2K01_FourWire_"
+#define DEVICE_UNDER_TEST "9BMB24K201_ThreeWire_MotorControl"
 
 //Compile time setup.
 //For enabeling / disabeling fan linerization.
@@ -36,7 +37,8 @@ bool isLinearizeFan = true;
 //bool isLinearizeFan = false;
 
 //For polatiry control of PWM.
-bool isInvertPWM = true;
+//bool isInvertPWM = true;  //Use with PWM control that has an inverting drive transistor.
+bool isInvertPWM = false; //Use with direct PWM control.
 
 
 #define FAN_PIN 6 //A PWM to control the fan through an inveting transistor.
